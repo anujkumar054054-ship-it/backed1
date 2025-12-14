@@ -1615,9 +1615,9 @@
         
         // Update invite link
         if (data.referral.link) {
-          inviteLink.textContent = `https://t.me/Webt2AppBot?start=${data.user.referral_code}`;
+          inviteLink.textContent = `https://t.me/WebtAppBot?start=${data.user.referral_code}`;
         } else if (data.user?.referral_code) {
-          inviteLink.textContent = `https://t.me/Webt2AppBot?start=${data.user.referral_code}`;
+          inviteLink.textContent = `https://t.me/Webt2ppBot?start=${data.user.referral_code}`;
         }
       }
       
@@ -2050,7 +2050,7 @@
               <i class="fa-solid fa-percent" style="font-size:11px;opacity:0.85;"></i>
               <span>Withdrawal Fee</span>
             </span>
-            <span>- ₹3</span>
+            <span>- ₹0</span>
           </div>
           <div style="margin-top:6px;padding-top:8px;border-top:1px dashed rgba(255,255,255,0.12);display:flex;justify-content:space-between;align-items:center;font-size:15px;font-weight:900;color:#7ee787;">
             <span style="display:flex;align-items:center;gap:6px;">
@@ -2146,7 +2146,7 @@
             
             chargeBox.style.display = 'block';
             selAmt.textContent = `₹${selectedAmount}`;
-            youGet.textContent = `₹${selectedAmount - 3}`;
+            youGet.textContent = `₹${selectedAmount - 0}`;
             
             // Enable the withdraw button when amount is selected
             modalPrimary.disabled = false;
