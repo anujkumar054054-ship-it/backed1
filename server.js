@@ -350,13 +350,13 @@ const wallet = await ensureWallet(chatId);
     [
       {
         text: "✅ Approve",
-        url: `https://yourdomain/api/withdraw/update?id=${wd._id}&status=completed`
+        url: `https://backed-nu.vercel.app/api/withdraw/update?id=${wd._id}&status=completed`
       }
     ],
     [
       {
         text: "❌ Reject",
-        url: `https://yourdomain/api/withdraw/update?id=${wd._id}&status=rejected`
+        url: `https://backed-nu.vercel.app/api/withdraw/update?id=${wd._id}&status=rejected`
       }
     ]
   ]
