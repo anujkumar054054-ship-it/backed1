@@ -167,19 +167,32 @@ async function sendUPIPayout(amount, vpa, info) {
 async function notifyAdminWithButtons(text, buttons) {
   const url = `https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendMessage`;
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: process.env.ADMIN_CHAT_ID,
-      text,
-      parse_mode: "HTML",
-      reply_markup: { inline_keyboard: buttons }
-    })
-  });
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: process.env.ADMIN_CHAT_ID,
+        text,
+        parse_mode: "HTML",
+        reply_markup: { inline_keyboard: buttons }
+      })
+    });
 
-  const data = await res.json();
-  return data.result.message_id; // 🔥 IMPORTANT
+    const data = await res.json();
+
+    // 🔒 SAFETY CHECK
+    if (!data.ok || !data.result) {
+      console.error("Telegram sendMessage failed:", data);
+      return null; // 👈 IMPORTANT
+    }
+
+    return data.result.message_id;
+
+  } catch (err) {
+    console.error("Telegram API error:", err);
+    return null;
+  }
 }
 
 
