@@ -192,24 +192,6 @@ async function notifyUser(chatId, text) {
   });
 }
 
-// ✅ NEW: Admin notification with inline buttons
-async function notifyAdminWithButtons(text, buttons) {
-  const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-
-  await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: ADMIN_CHAT_ID,
-      text,
-      parse_mode: "HTML",
-      reply_markup: {
-        inline_keyboard: buttons
-      }
-    })
-  });
-}
-
 // ----------------------------------------------
 // 1. USER API
 // ----------------------------------------------
