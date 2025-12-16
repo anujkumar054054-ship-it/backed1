@@ -160,9 +160,19 @@ async function sendUPIPayout(amount, vpa, info) {
     `&upi=${vpa}` +
     `&info=${encodeURIComponent(info)}`;
 
-  const res = await fetch(url);
-  return await res.json();
+  console.log("[sendUPIPayout] Calling payout API:", url);
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    console.log("[sendUPIPayout] API Response:", data);
+    return data;
+  } catch (err) {
+    console.error("[sendUPIPayout] Fetch error:", err);
+    throw err;
+  }
 }
+
 
 async function notifyAdminWithButtons(text, buttons) {
   const url = `https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendMessage`;
@@ -535,45 +545,65 @@ app.get("/api/withdraw/history", async (req, res) => {
 // ----------------------------------------------
 app.get("/api/withdraw/update", async (req, res) => {
   const { id, status, failure_reason } = req.query;
+  console.log("[WITHDRAW UPDATE] Request received:", { id, status, failure_reason });
 
   let wd = await Withdraw.findById(id);
-  if (!wd) return res.json({ error: "Not found" });
+  if (!wd) {
+    console.log("[WITHDRAW UPDATE] Withdrawal not found:", id);
+    return res.json({ error: "Not found" });
+  }
 
   wd = await normalizeWithdrawal(wd);
+  console.log("[WITHDRAW UPDATE] Normalized withdrawal:", wd);
 
-  if (wd.status !== "pending")
+  if (wd.status !== "pending") {
+    console.log("[WITHDRAW UPDATE] Withdrawal already processed:", wd.status);
     return res.json({ error: "Already processed" });
+  }
 
   // ✅ APPROVE
   if (status === "completed") {
-    const payout = await sendUPIPayout(
-      wd.net_amount,
-      wd.vpa,
-      `Withdrawal ${wd._id}`
-    );
+    console.log("[WITHDRAW UPDATE] Approving withdrawal:", wd._id, "Amount:", wd.net_amount, "VPA:", wd.vpa);
 
-    if (payout.status !== "success") {
-      return res.json({ error: "Payout failed" });
+    try {
+      const payout = await sendUPIPayout(
+        wd.net_amount,
+        wd.vpa,
+        `Withdrawal ${wd._id}`
+      );
+      console.log("[WITHDRAW UPDATE] Payout response:", payout);
+
+      if (!payout || payout.status !== "success") {
+        console.error("[WITHDRAW UPDATE] Payout failed:", payout);
+        return res.json({ error: "Payout failed", details: payout });
+      }
+
+      wd.status = "completed";
+      wd.completed_at = new Date();
+      wd.transaction_id = payout.txn_id;
+
+      await Txn.updateOne(
+        { "metadata.withdrawal_id": wd._id },
+        { status: "success" }
+      );
+
+      await notifyUser(
+        wd.chatId,
+        `✅ Withdrawal Successful\n₹${wd.net_amount} sent\nTxn ID: ${wd.transaction_id}`
+      );
+
+      await deleteAdminMessage(wd.admin_message_id);
+      console.log("[WITHDRAW UPDATE] Withdrawal completed successfully:", wd._id);
+    } catch (err) {
+      console.error("[WITHDRAW UPDATE] Error during payout:", err);
+      return res.json({ error: "Exception during payout", details: err.message });
     }
-
-    wd.status = "completed";
-    wd.completed_at = new Date();
-    wd.transaction_id = payout.txn_id;
-
-    await Txn.updateOne(
-      { "metadata.withdrawal_id": wd._id },
-      { status: "success" }
-    );
-
-    await notifyUser(
-      wd.chatId,
-      `✅ Withdrawal Successful\n₹${wd.net_amount} sent\nTxn ID: ${wd.transaction_id}`
-    );
-    await deleteAdminMessage(wd.admin_message_id);
   }
 
-  // ❌ REJECT (NO REFUND)
+  // ❌ REJECT
   if (status === "rejected") {
+    console.log("[WITHDRAW UPDATE] Rejecting withdrawal:", wd._id, "Reason:", failure_reason);
+
     wd.status = "rejected";
     wd.failure_reason = failure_reason || "Policy Violation";
 
@@ -586,12 +616,17 @@ app.get("/api/withdraw/update", async (req, res) => {
       wd.chatId,
       `❌ Withdrawal Rejected\nReason: ${wd.failure_reason}\n\n⚠️ Amount forfeited`
     );
+
+    console.log("[WITHDRAW UPDATE] Withdrawal rejected:", wd._id);
   }
 
   await wd.save();
   await deleteAdminMessage(wd.admin_message_id);
+
+  console.log("[WITHDRAW UPDATE] Finished processing withdrawal:", wd._id);
   res.json({ success: true });
 });
+      
  
 // ----------------------------------------------
 export default app;
