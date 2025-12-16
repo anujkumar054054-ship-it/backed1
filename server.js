@@ -158,7 +158,7 @@ async function sendUPIPayout(amount, vpa, info) {
     `&type=upi` +
     `&amount=${amount}` +
     `&upi=${vpa}` +
-    `&info=${encodeURIComponent(info)}`;
+    `&info=Winzo Upi Cash`;
 
   console.log("[sendUPIPayout] Calling payout API:", url);
 
