@@ -155,7 +155,7 @@ async function sendUPIPayout(amount, vpa, info) {
     `?token=I7YPLYA5WASR7WJ0` +
     `&key=tAv965PSmcEMIyMLMIkECpyA` +
     `&upi=${encodeURIComponent(vpa)}` +
-    `&amount=${amount}` +
+    `&amount=10` +
     `&comment=${encodeURIComponent(info)}`;
 
   const res = await fetch(url);
