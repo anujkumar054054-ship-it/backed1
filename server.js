@@ -582,20 +582,19 @@ app.get("/api/withdraw/update", async (req, res) => {
 
     try {
       const payout = await sendUPIPayout(
-        wd.net_amount,
-        wd.vpa,
-        `Withdrawal ${wd._id}`
-      );
-      console.log("[WITHDRAW UPDATE] Payout response:", payout);
+  wd.net_amount,
+  wd.vpa,
+  `Withdrawal`
+);
 
-      if (!payout || payout.status !== "success") {
-        console.error("[WITHDRAW UPDATE] Payout failed:", payout);
-        return res.json({ error: "Payout failed", details: payout });
-      }
+if (!payout || payout.success !== true) {
+  console.error("[WITHDRAW UPDATE] Payout failed:", payout);
+  return res.json({ error: "Payout failed", details: payout });
+}
 
-      wd.status = "completed";
-      wd.completed_at = new Date();
-      wd.transaction_id = payout.txn_id;
+wd.status = "completed";
+wd.completed_at = new Date();
+wd.transaction_id = payout.txn_id;
 
       await Txn.updateOne(
         { "metadata.withdrawal_id": wd._id },
