@@ -323,84 +323,105 @@ app.get("/api/upi", async (req, res) => {
 // 4. WITHDRAWAL (DEDUCT + FORMATTED NOTIFICATIONS)
 // ----------------------------------------------
 app.post("/api/withdraw/initiate", async (req, res) => {
-  const { chatId, amount, netAmount, fee, vpa } = req.body;
+  const { chatId, amount, vpa } = req.body;
 
-const withdrawAmount = Number(amount);
-const net = Number(netAmount);
-const platformFee = Number(fee);
-const wallet = await ensureWallet(chatId);
-  
+  const withdrawAmount = Number(amount);
+  if (!chatId || !withdrawAmount || !vpa) {
+    return res.status(400).json({ error: "Invalid request" });
+  }
+
+  const wallet = await ensureWallet(chatId);
 
   if (wallet.balance < withdrawAmount) {
     return res.json({ error: "Insufficient balance" });
   }
 
+  // 🔻 Deduct balance first
   wallet.balance -= withdrawAmount;
   await wallet.save();
 
+  // Create withdrawal record
   const wd = await Withdraw.create({
-  chatId,
-  amount: withdrawAmount,
-  fee: platformFee,
-  net_amount: net,
-  vpa,
-  status: "pending",
-  initiated_at: new Date()
-});
-  
+    chatId,
+    amount: withdrawAmount,
+    fee: 0,
+    net_amount: withdrawAmount,
+    vpa,
+    status: "processing",
+    initiated_at: new Date()
+  });
 
   // Create transaction
   await Txn.create({
     chatId,
     type: "debit",
     amount: withdrawAmount,
-    description: "Withdrawal Requested",
-    status: "pending",
+    description: "Withdrawal",
+    status: "processing",
     metadata: { withdrawal_id: wd._id }
   });
 
-  // Notify user (✔ your required format)
-  await notifyUser(
-    chatId,
-    `Withdrawal of ₹${withdrawAmount} has been requested.It will be credited to your UPI ${vpa} soon. (Txn id: withdrawal ${wd._id})`);
+  // 🚀 CALL SAATHI GATEWAY IMMEDIATELY
+  try {
+    const payout = await sendUPIPayout(
+      withdrawAmount,
+      vpa,
+      `Withdrawal ${wd._id}`
+    );
 
-  // Notify admin
-  const adminMsgId = await notifyAdminWithButtons(
-  `🛑 <b>New Withdrawal Request</b>\n\n` +
-  `User: <code>${chatId}</code>\n` +
-  `Amount: ₹${withdrawAmount}\n` +
-  `VPA: ${vpa}\n` +
-  `Withdraw ID: <code>${wd._id}</code>`,
-  [
-    [
-      {
-        text: "✅ Approve",
-        url: `https://backed-nu.vercel.app/api/withdraw/update?id=${wd._id}&status=completed`
-      }
-    ],
-    [
-      {
-        text: "❌ Reject",
-        url: `https://backed-nu.vercel.app/api/withdraw/update?id=${wd._id}&status=rejected`
-      }
-    ]
-  ]
-);
+    if (!payout || payout.success !== true) {
+      throw new Error("Payout failed");
+    }
 
-wd.admin_message_id = adminMsgId;
-await wd.save();
-  
+    // ✅ SUCCESS
+    wd.status = "completed";
+    wd.completed_at = new Date();
+    wd.transaction_id = payout.txn_id;
+    await wd.save();
 
+    await Txn.updateOne(
+      { "metadata.withdrawal_id": wd._id },
+      { status: "success" }
+    );
 
-  res.json({
-    withdrawal_id: wd._id,
-    amount: withdrawAmount,
-    fee,
-    net_amount: net,
-    status: "pending",
-    estimated_time: "2-4 hours"
-  });
+    await notifyUser(
+      chatId,
+      `✅ Withdrawal Successful\n\n₹${withdrawAmount} sent to ${vpa}\nTxn ID: ${payout.txn_id}`
+    );
+
+    return res.json({
+      success: true,
+      txn_id: payout.txn_id,
+      amount: withdrawAmount
+    });
+
+  } catch (err) {
+    console.error("[AUTO PAYOUT FAILED]", err);
+
+    // 🔁 REFUND USER
+    wallet.balance += withdrawAmount;
+    await wallet.save();
+
+    wd.status = "failed";
+    wd.failure_reason = "Payout failed";
+    await wd.save();
+
+    await Txn.updateOne(
+      { "metadata.withdrawal_id": wd._id },
+      { status: "failed" }
+    );
+
+    await notifyUser(
+      chatId,
+      `❌ Withdrawal Failed\n\n₹${withdrawAmount} refunded to wallet`
+    );
+
+    return res.json({
+      error: "Payout failed, amount refunded"
+    });
+  }
 });
+  
 
 // ----------------------------------------------
 // 5. REFERRAL SUMMARY
