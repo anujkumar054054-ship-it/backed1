@@ -425,7 +425,7 @@ app.get("/api/referral", async (req, res) => {
     successful_referrals: ref?.referred_users.filter(x => x.is_active).length || 0,
     total_earned: (ref?.total_earned || 0).toFixed(2),
     pending_earned: (ref?.pending_earned || 0).toFixed(2),
-    commission_per_referral: "3.00"
+    commission_per_referral: "5.00"
   });
 });
 
@@ -492,11 +492,11 @@ app.all("/api/bot/refer", async (req, res) => {
           user_id: chatId,
           username: username || "",
           joined_at: new Date(),
-          earned_amount: 3,
+          earned_amount: 5,
           is_active: true
         });
 
-        refDoc.total_earned += 3;
+        refDoc.total_earned += 5;
         await refDoc.save();
 
         // Add money to inviter
@@ -507,7 +507,7 @@ app.all("/api/bot/refer", async (req, res) => {
         await Txn.create({
           chatId: inviter.chatId,
           type: "credit",
-          amount: 3,
+          amount: 5,
           description: "Referral Reward",
           status: "success",
           metadata: { referred_user: chatId }
@@ -516,7 +516,7 @@ app.all("/api/bot/refer", async (req, res) => {
         // Send correct formatted notification
         await notifyUser(
           inviter.chatId,
-          `🎉You earned 3 as invite bonus! The user ${chatId} registered using your link.`
+          `🎉You earned 5 as invite bonus! The user ${chatId} registered using your link.`
         );
       }
     }
