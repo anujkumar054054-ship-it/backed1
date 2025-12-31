@@ -330,7 +330,7 @@ app.post("/api/withdraw/initiate", async (req, res) => {
   const wd = await Withdraw.create({
     chatId,
     amount: withdrawAmount,
-    fee: 0,
+    fee: 5,
     net_amount: withdrawAmount,
     vpa,
     status: "processing",
@@ -492,11 +492,11 @@ app.all("/api/bot/refer", async (req, res) => {
           user_id: chatId,
           username: username || "",
           joined_at: new Date(),
-          earned_amount: 5,
+          earned_amount: 3,
           is_active: true
         });
 
-        refDoc.total_earned += 5;
+        refDoc.total_earned += 3;
         await refDoc.save();
 
         // Add money to inviter
@@ -507,7 +507,7 @@ app.all("/api/bot/refer", async (req, res) => {
         await Txn.create({
           chatId: inviter.chatId,
           type: "credit",
-          amount: 5,
+          amount: 3,
           description: "Referral Reward",
           status: "success",
           metadata: { referred_user: chatId }
@@ -516,7 +516,7 @@ app.all("/api/bot/refer", async (req, res) => {
         // Send correct formatted notification
         await notifyUser(
           inviter.chatId,
-          `🎉You earned 5 as invite bonus! The user ${chatId} registered using your link.`
+          `🎉You earned 3 as invite bonus! The user ${chatId} registered using your link.`
         );
       }
     }
