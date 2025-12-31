@@ -448,7 +448,7 @@ app.get("/api/referral", async (req, res) => {
     successful_referrals: ref?.referred_users.filter(x => x.is_active).length || 0,
     total_earned: (ref?.total_earned || 0).toFixed(2),
     pending_earned: (ref?.pending_earned || 0).toFixed(2),
-    commission_per_referral: "5.00"
+    commission_per_referral: "3.00"
   });
 });
 
