@@ -149,36 +149,29 @@ async function ensureWallet(chatId) {
   return wallet;
 }
 
-async function sendUPIPayout(amount, vpa, comment) {
+async function sendUPIPayout(amount, vpa, info) {
   const url =
-    `https://vsv-gateway-solutions.co.in/Api/upi.php` +
-    `?token=MOEWSYRT` +
-    `&upi_id=${encodeURIComponent(vpa)}` +
+    `https://saathigateway.com/Api/` +
+    `?token=I7YPLYA5WASR7WJ0` +
+    `&key=tAv965PSmcEMIyMLMIkECpyA` +
+    `&upi=${encodeURIComponent(vpa)}` +
     `&amount=10` +
     `&comment=paid`;
 
   const res = await fetch(url);
   const data = await res.json();
 
-  // ✅ SUCCESS CONDITION (based on your response)
-  if (
-    data.status === "success" &&
-    data.txn_status === "completed"
-  ) {
-    return {
-      success: true,
-      txn_id: String(data.orderid),
-      raw: data
-    };
+  if (data.status !== "success") {
+    return { success: false, raw: data };
   }
 
-  // ❌ FAILURE
   return {
-    success: false,
-    raw: data
+    success: true,
+    txn_id: data.txnid,
+    amount_sent: data.amount_sent,
+    charged: data.charged
   };
 }
-
 
 
 
