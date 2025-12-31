@@ -161,12 +161,23 @@ async function sendUPIPayout(amount, vpa, info = "paid") {
 
   try {
     const res = await fetch(url);
-    const data = await res.json();
 
-    console.log("[VSV PAYOUT] Response:", data);
+    // 🔴 READ RAW TEXT FIRST
+    const rawText = await res.text();
+    console.log("[VSV PAYOUT] RAW RESPONSE:", rawText);
+
+    // 🟢 EXTRACT JSON ONLY
+    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error("Invalid gateway response (no JSON found)");
+    }
+
+    const data = JSON.parse(jsonMatch[0]);
+
+    console.log("[VSV PAYOUT] PARSED JSON:", data);
 
     /*
-      Expected response:
+      Expected:
       {
         status: "success",
         orderid: 9653414,
@@ -174,7 +185,6 @@ async function sendUPIPayout(amount, vpa, info = "paid") {
       }
     */
 
-    // ✅ STRICT SUCCESS CHECK
     if (
       data.status !== "success" ||
       data.txn_status !== "completed"
@@ -195,7 +205,10 @@ async function sendUPIPayout(amount, vpa, info = "paid") {
     console.error("[VSV PAYOUT] Error:", err);
     throw err;
   }
-}
+      }
+
+
+        
 
 
 async function notifyAdminWithButtons(text, buttons) {
