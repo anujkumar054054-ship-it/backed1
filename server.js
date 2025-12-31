@@ -508,7 +508,7 @@ app.all("/api/bot/refer", async (req, res) => {
 
         // Add money to inviter
         let inviterWallet = await ensureWallet(inviter.chatId);
-        inviterWallet.balance += 3;
+        inviterWallet.balance += 5;
         await inviterWallet.save();
 
         await Txn.create({
