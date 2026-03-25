@@ -23,10 +23,10 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 export const REQUIRED_CHANNELS = [
   // ── Telegram channels (type: "telegram") ──────────────────────────────
   // username = the @username WITHOUT the @ sign. Used for getChatMember API.
-  { type: "telegram", name: "Cash Hungama",  link: "https://t.me/+wxVjfol5y-9mODQ9",  username: "cashhungama"  },
-  { type: "telegram", name: "Earn Daily",    link: "https://t.me/+NxHKX1IDRgg5ZDY1",    username: "earndaily"    },
-  { type: "telegram", name: "Refer & Win",   link: "https://t.me/+1NkfO3yeXQ82ZmE1",  username: "referandwin"  },
-  { type: "youtube", name: "Cash Hungama YT", link: "https://youtube.com/@yourchannel" },
+  { type: "telegram", name: "Cash Hungama",  link: "https://t.me/+wxVjfol5y-9mODQ9",  username: "-1003856337430"  },
+  { type: "telegram", name: "Earn Daily",    link: "https://t.me/+NxHKX1IDRgg5ZDY1",    username: "-1003891165485"    },
+  { type: "telegram", name: "Refer & Win",   link: "https://t.me/+1NkfO3yeXQ82ZmE1",  username: "-1003856337430"  },
+  { type: "youtube", name: "Cash Hungama YT", link: "https://youtube.com/@yourchannel" }
 ];
 
 // ---------------------
