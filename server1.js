@@ -265,20 +265,18 @@ app.get("/api/referral", async (req, res) => {
   const user = await User.findOne({ chatId });
   const ref  = await Referral.findOne({ chatId });
   
-  // Check if THIS USER is duplicate
+  // Duplicate users can STILL earn from referrals
+  // They just don't give rewards to others when they sign up
   const isDuplicate = user?.is_duplicate_device || false;
-  
-  // If duplicate, commission per referral is 0
-  const commissionPerReferral = isDuplicate ? "0.00" : "5.00";
   
   res.json({
     code: user?.referral_code || "",
     link: `https://t.me/winzoplay_bot?start=${user?.referral_code || ""}`,
     total_referrals: ref?.referred_users.length || 0,
     successful_referrals: ref?.referred_users.filter(x => x.is_active).length || 0,
-    total_earned: (ref?.total_earned || 0).toFixed(2),
+    total_earned: (ref?.total_earned || 0).toFixed(2),  // Show actual earnings
     pending_earned: (ref?.pending_earned || 0).toFixed(2),
-    commission_per_referral: commissionPerReferral,
+    commission_per_referral: "5.00",  // Always ₹5 for everyone
     is_duplicate_device: isDuplicate
   });
 });
@@ -320,18 +318,18 @@ app.all("/api/bot/refer", async (req, res) => {
     // Give reward ONLY if:
     // 1. There's a referrer (ref exists)
     // 2. This user is being referred for the first time
-    // 3. The REFERRER is NOT a duplicate device
+    // 3. The NEW USER is NOT a duplicate device
     if (ref && user.referred_by === (ref || null)) {
       const inviter = await User.findOne({ referral_code: ref });
       
       if (inviter) {
-        // CRITICAL: Check if the REFERRER is duplicate
-        if (inviter.is_duplicate_device || inviter.device_blocked) {
-          // Referrer is duplicate - skip reward
-          console.log(`[Referral] Skipped reward - referrer ${inviter.chatId} is duplicate device`);
-          await notifyUser(inviter.chatId, `⚠️ You didn't earn referral reward because your device is marked as duplicate. Referral earnings are disabled for duplicate devices.`);
+        // CRITICAL: Check if the NEW USER is duplicate
+        if (isDuplicateUser) {
+          // New user is duplicate - skip reward for referrer
+          console.log(`[Referral] Skipped reward - referred user ${chatId} is duplicate device`);
+          await notifyUser(inviter.chatId, `⚠️ A user joined via your link but was detected as duplicate device. No reward was added.`);
         } else {
-          // Referrer is legitimate - give reward
+          // New user is legitimate - give reward to referrer
           let refDoc = await Referral.findOne({ chatId: inviter.chatId });
           if (!refDoc) {
             refDoc = await Referral.create({ 
@@ -385,6 +383,7 @@ app.all("/api/bot/refer", async (req, res) => {
     res.json({ success: false });
   }
 });
+
 // ══════════════════════════════════════════════
 // 8. WITHDRAW HISTORY
 // ══════════════════════════════════════════════
