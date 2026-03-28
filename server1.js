@@ -264,17 +264,24 @@ app.get("/api/referral", async (req, res) => {
   const { chatId } = req.query;
   const user = await User.findOne({ chatId });
   const ref  = await Referral.findOne({ chatId });
+  
+  // Check if THIS USER is duplicate
+  const isDuplicate = user?.is_duplicate_device || false;
+  
+  // If duplicate, commission per referral is 0
+  const commissionPerReferral = isDuplicate ? "0.00" : "5.00";
+  
   res.json({
-    code: user.referral_code,
-    link: `https://t.me/winzoplay_bot?start=${user.referral_code}`,
-    total_referrals:         ref?.referred_users.length || 0,
-    successful_referrals:    ref?.referred_users.filter(x => x.is_active).length || 0,
-    total_earned:            (ref?.total_earned || 0).toFixed(2),
-    pending_earned:          (ref?.pending_earned || 0).toFixed(2),
-    commission_per_referral: "5.00"
+    code: user?.referral_code || "",
+    link: `https://t.me/winzoplay_bot?start=${user?.referral_code || ""}`,
+    total_referrals: ref?.referred_users.length || 0,
+    successful_referrals: ref?.referred_users.filter(x => x.is_active).length || 0,
+    total_earned: (ref?.total_earned || 0).toFixed(2),
+    pending_earned: (ref?.pending_earned || 0).toFixed(2),
+    commission_per_referral: commissionPerReferral,
+    is_duplicate_device: isDuplicate
   });
 });
-
 // ══════════════════════════════════════════════
 // 6. REFERRAL USER LIST
 // ══════════════════════════════════════════════
@@ -293,6 +300,9 @@ app.all("/api/bot/refer", async (req, res) => {
     const { chatId, username, avatar, ref, duplicate_device, device_id } = data;
     if (!chatId) return res.status(400).json({ success: false, error: "chatId required" });
 
+    // Check if THIS user (the new signup) is a duplicate device
+    const isDuplicateUser = duplicate_device === true || duplicate_device === "true";
+    
     let user = await User.findOne({ chatId });
     if (!user) {
       const referralCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -300,39 +310,81 @@ app.all("/api/bot/refer", async (req, res) => {
         chatId, username, avatar, referral_code: referralCode,
         referred_by: ref || null,
         device_id: device_id || null,
-        is_duplicate_device: duplicate_device || false
+        is_duplicate_device: isDuplicateUser,
+        device_blocked: false
       });
       await ensureWallet(chatId);
     }
 
-    // Referral reward (only for new users)
+    // Referral reward logic
+    // Give reward ONLY if:
+    // 1. There's a referrer (ref exists)
+    // 2. This user is being referred for the first time
+    // 3. The REFERRER is NOT a duplicate device
     if (ref && user.referred_by === (ref || null)) {
       const inviter = await User.findOne({ referral_code: ref });
+      
       if (inviter) {
-        let refDoc = await Referral.findOne({ chatId: inviter.chatId });
-        if (!refDoc) refDoc = await Referral.create({ chatId: inviter.chatId, referral_code: inviter.referral_code, referred_users: [] });
-        // Don't double-reward
-        const alreadyRewarded = refDoc.referred_users.some(u => u.user_id === chatId);
-        if (!alreadyRewarded) {
-          refDoc.referred_users.push({ user_id: chatId, username: username || "", joined_at: new Date(), earned_amount: 5, is_active: true });
-          refDoc.total_earned += 5;
-          await refDoc.save();
-          const inviterWallet = await ensureWallet(inviter.chatId);
-          inviterWallet.balance += 5; await inviterWallet.save();
-          await Txn.create({ chatId: inviter.chatId, type: "credit", amount: 5,
-            description: "Referral Reward", status: "success", metadata: { referred_user: chatId } });
-          await notifyUser(inviter.chatId, `🎉 You earned ₹5 as invite bonus! User registered via your link.`);
+        // CRITICAL: Check if the REFERRER is duplicate
+        if (inviter.is_duplicate_device || inviter.device_blocked) {
+          // Referrer is duplicate - skip reward
+          console.log(`[Referral] Skipped reward - referrer ${inviter.chatId} is duplicate device`);
+          await notifyUser(inviter.chatId, `⚠️ You didn't earn referral reward because your device is marked as duplicate. Referral earnings are disabled for duplicate devices.`);
+        } else {
+          // Referrer is legitimate - give reward
+          let refDoc = await Referral.findOne({ chatId: inviter.chatId });
+          if (!refDoc) {
+            refDoc = await Referral.create({ 
+              chatId: inviter.chatId, 
+              referral_code: inviter.referral_code, 
+              referred_users: [] 
+            });
+          }
+          
+          // Don't double-reward
+          const alreadyRewarded = refDoc.referred_users.some(u => u.user_id === chatId);
+          if (!alreadyRewarded) {
+            const rewardAmount = 5;
+            refDoc.referred_users.push({ 
+              user_id: chatId, 
+              username: username || "", 
+              joined_at: new Date(), 
+              earned_amount: rewardAmount, 
+              is_active: true 
+            });
+            refDoc.total_earned += rewardAmount;
+            await refDoc.save();
+            
+            const inviterWallet = await ensureWallet(inviter.chatId);
+            inviterWallet.balance += rewardAmount;
+            await inviterWallet.save();
+            
+            await Txn.create({ 
+              chatId: inviter.chatId, 
+              type: "credit", 
+              amount: rewardAmount,
+              description: "Referral Reward", 
+              status: "success", 
+              metadata: { referred_user: chatId } 
+            });
+            
+            await notifyUser(inviter.chatId, `🎉 You earned ₹${rewardAmount} as invite bonus! User registered via your link.`);
+          }
         }
       }
     }
 
-    res.json({ success: true, referral_code: user.referral_code, referred_by: user.referred_by });
+    res.json({ 
+      success: true, 
+      referral_code: user.referral_code, 
+      referred_by: user.referred_by,
+      is_duplicate_device: user.is_duplicate_device || false
+    });
   } catch (err) {
     console.error("Referral error:", err);
     res.json({ success: false });
   }
 });
-
 // ══════════════════════════════════════════════
 // 8. WITHDRAW HISTORY
 // ══════════════════════════════════════════════
@@ -467,54 +519,51 @@ app.get("/api/channels/status", async (req, res) => {
  * Fail-open: any DB/network error returns { blocked: false }
  * so a backend outage doesn't lock out all users.
  */
-app.post("/api/device/check", async (req, res) => {
+  app.post("/api/device/check", async (req, res) => {
   const { chatId, device_id } = req.body;
-  if (!chatId || !device_id) return res.json({ blocked: false });
+  if (!chatId || !device_id) return res.json({ blocked: false, duplicate_device: false });
 
   try {
-    // Check if user is already manually blocked in User collection
-    const user = await User.findOne({ chatId: String(chatId) });
-    if (user?.device_blocked) {
-      return res.json({ blocked: true, reason: user.device_blocked_reason || "Device blocked" });
-    }
-
-    // Look up or create device registry entry
     let registry = await DeviceRegistry.findOne({ device_id });
 
     if (!registry) {
-      // First time this device is seen — register it
       await DeviceRegistry.create({ device_id, chatId: String(chatId) });
       console.log(`[Device] Registered device ${device_id.slice(0,12)}... for user ${chatId}`);
-      return res.json({ blocked: false });
+      return res.json({ blocked: false, duplicate_device: false });
     }
 
     if (registry.chatId === String(chatId)) {
-      // Same device, same user — fine
-      return res.json({ blocked: false });
+      return res.json({ blocked: false, duplicate_device: false });
     }
 
-    // Different user on same device — block the new user
-    console.warn(`[Device] BLOCK: device ${device_id.slice(0,12)}... already belongs to ${registry.chatId}, rejecting ${chatId}`);
+    // Different user on same device — mark as duplicate but DON'T block app access
+    console.warn(`[Device] DUPLICATE: device ${device_id.slice(0,12)}... already belongs to ${registry.chatId}, user ${chatId} is duplicate`);
 
-    // Track which accounts tried to use this device
     if (!registry.blocked_chatIds.includes(String(chatId))) {
       registry.blocked_chatIds.push(String(chatId));
       registry.updated_at = new Date();
       await registry.save();
     }
 
-    // Mark the user as device-blocked in User model too
+    // Mark as duplicate device (but NOT blocked from using app)
     await User.findOneAndUpdate(
       { chatId: String(chatId) },
-      { device_blocked: true, device_blocked_reason: "Same device as another account" },
+      { 
+        is_duplicate_device: true,
+        device_blocked: false  // ← User can still use app
+      },
       { upsert: false }
     ).catch(() => {});
 
-    return res.json({ blocked: true, reason: "This device is already linked to another account." });
+    return res.json({ 
+      blocked: false,  // ← App access allowed
+      duplicate_device: true,
+      reason: "Duplicate device detected - referral earnings disabled"
+    });
 
   } catch (e) {
     console.error("[device/check] Error:", e.message);
-    return res.json({ blocked: false }); // fail open
+    return res.json({ blocked: false, duplicate_device: false });
   }
 });
 
@@ -541,5 +590,18 @@ app.post("/api/device/unblock", async (req, res) => {
   }
 });
 
+app.get("/api/user/duplicate-status", async (req, res) => {
+  const { chatId } = req.query;
+  if (!chatId) return res.status(400).json({ error: "chatId required" });
+  
+  const user = await User.findOne({ chatId });
+  if (!user) return res.json({ exists: false, is_duplicate_device: false });
+  
+  res.json({
+    chatId: user.chatId,
+    is_duplicate_device: user.is_duplicate_device || false,
+    can_refer_earn: !user.is_duplicate_device  // Only true if not duplicate
+  });
+});
 // ══════════════════════════════════════════════
 export default app;
