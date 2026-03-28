@@ -21,12 +21,10 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 // Every user must join ALL of these before accessing the app.
 // ---------------------
 export const REQUIRED_CHANNELS = [
-  // ── Telegram channels (type: "telegram") ──────────────────────────────
-  // username = the @username WITHOUT the @ sign. Used for getChatMember API.
-  { type: "telegram", name: "Cash Hungama",  link: "https://t.me/+wxVjfol5y-9mODQ9",  username: "-1003856337430"  },
-  { type: "telegram", name: "Earn Daily",    link: "https://t.me/+NxHKX1IDRgg5ZDY1",    username: "-1003891165485"    },
-  { type: "telegram", name: "Refer & Win",   link: "https://t.me/+1NkfO3yeXQ82ZmE1",  username: "-1003856337430"  },
-  { type: "youtube", name: "Cash Hungama YT", link: "https://youtube.com/@yourchannel" }
+  { type: "telegram", name: "Cash Hungama",   link: "https://t.me/+wxVjfol5y-9mODQ9",  chatId: "-1001234567890" },
+  { type: "telegram", name: "Earn Daily",     link: "https://t.me/+NxHKX1IDRgg5ZDY1",  chatId: "-1009876543210" },
+  { type: "telegram", name: "Refer & Win",    link: "https://t.me/+1NkfO3yeXQ82ZmE1",  chatId: "-1001122334455" },
+  { type: "youtube",  name: "Cash Hungama YT", link: "https://youtube.com/@yourchannel" },
 ];
 
 // ---------------------
@@ -193,26 +191,23 @@ async function notifyUser(chatId, text) {
 // Channel membership check via Telegram Bot API
 // Returns true if user is a member/admin/creator of the channel
 // ---------------------
-async function checkChannelMembership(chatId, channelUsername) {
+async function checkChannelMembership(userChatId, channelChatId) {
   try {
     const url = `https://api.telegram.org/bot${BOT_TOKEN}/getChatMember`;
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        chat_id: `@${channelUsername}`,
-        user_id: Number(chatId)
+        chat_id: channelChatId,   // ← numeric ID like -1001234567890
+        user_id: Number(userChatId)
       })
     });
     const data = await res.json();
     if (!data.ok) return false;
     const status = data.result?.status;
-    // Valid statuses: member, administrator, creator, restricted (still a member)
-    // Invalid: left, kicked
     return ["member", "administrator", "creator", "restricted"].includes(status);
   } catch (e) {
-    console.error(`Membership check failed for @${channelUsername}:`, e.message);
-    return false; // fail safe: treat as not joined
+    return false;
   }
 }
 
@@ -477,7 +472,7 @@ app.post("/api/channels/check", async (req, res) => {
         // Cannot verify YouTube subscription server-side — treat as passed.
         return { ...ch, joined: true };
       }
-      const joined = await checkChannelMembership(chatId, ch.username);
+      const joined = await checkChannelMembership(chatId, ch.chatId);
       return { ...ch, joined };
     })
   );
