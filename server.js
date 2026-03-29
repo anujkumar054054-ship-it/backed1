@@ -18,10 +18,10 @@ const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
 export const REQUIRED_CHANNELS = [
-  { type: "telegram", name: "GIFT AREA",   link: "https://t.me/+XdZuJwc9_4Q2Yjk1",  chatId: "-1003535064379" },
-  { type: "telegram", name: "⏤͟͞𝗧𝗘𝗔𝗠 > 𝗧𝗗𝗫 ™(🇮🇳)",     link: "https://t.me/+JsisAx6p0RoyYWE9",  chatId: "-1003406850853" },
-  { type: "telegram", name: "Refer & Win",    link: "https://t.me/+1NkfO3yeXQ82ZmE1",  chatId: "-1003856337430" },
-  { type: "youtube",  name: "Cash Hungama YT", link: "https://youtube.com/@yourchannel" },
+  { type: "telegram", name: "𝗚𝗜𝗙𝗧𝗦 𝗔𝗥𝗘𝗔",   link: "https://t.me/+XdZuJwc9_4Q2Yjk1",  chatId: "-1002011746823" },
+  { type: "telegram", name: "⏤͟͞𝗧𝗘𝗔𝗠 > 𝗧𝗗𝗫 ™(🇮🇳)",     link: "https://t.me/+JsisAx6p0RoyYWE9",  chatId: "-1002047501605" },
+  { type: "telegram", name: "𝗢𝗣 𝗟𝗼𝗼𝘁𝗲𝗿𝘀 ( 𝗢𝗳𝗳𝗶𝗰𝗶𝗮𝗹 )",    link: "https://t.me/+HqXsPCqDf90yN2U1",  chatId: "-1002066749099" },
+  { type: "youtube",  name: "𝗦𝘂𝗯𝘀𝗰𝗿𝗶𝗯𝗲", link: "https://www.youtube.com/@hidden_gamerx" },
 ];
 
 const User = mongoose.model("User", new mongoose.Schema({
