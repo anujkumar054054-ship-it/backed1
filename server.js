@@ -233,7 +233,7 @@ app.get("/api/referral", async (req, res) => {
   const ref  = await Referral.findOne({ chatId });
   res.json({
     code: user?.referral_code || "",
-    link: `https://t.me/Rush_UpiEarn_Bot?start=${user?.referral_code || ""}`,
+    link: `https://t.me/cashLootking_bot?start=${user?.referral_code || ""}`,
     total_referrals:         ref?.referred_users.length || 0,
     successful_referrals:    ref?.referred_users.filter(x => x.is_active).length || 0,
     total_earned:            (ref?.total_earned || 0).toFixed(2),
