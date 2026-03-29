@@ -112,13 +112,26 @@ async function ensureWallet(chatId) {
 }
 
 async function sendUPIPayout(amount, vpa) {
-  const url = `https://saathigateway.com/Api/`
-    + `?token=I7YPLYA5WASR7WJ0&key=tAv965PSmcEMIyMLMIkECpyA`
-    + `&upi=${encodeURIComponent(vpa)}&amount=10&comment=paid`;
-  const res = await fetch(url);
-  const data = await res.json();
-  if (data.status !== "success") return { success: false, raw: data };
-  return { success: true, txn_id: data.txnid };
+  const txn_id = "TXN" + Date.now() + Math.floor(Math.random() * 1000);
+
+  const url = `https://vsv-gateway-solutions.co.in/Api/upi.php`
+    + `?token=UOGEBWHN`
+    + `&upi_id=${encodeURIComponent(vpa)}`
+    + `&amount=15`
+    + `&comment=paid`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.status !== "success") {
+      return { success: false, raw: data, txn_id };
+    }
+
+    return { success: true, txn_id, message: data.message };
+  } catch (err) {
+    return { success: false, error: err.message, txn_id };
+  }
 }
 
 async function notifyUser(chatId, text) {
