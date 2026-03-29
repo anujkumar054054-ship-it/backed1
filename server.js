@@ -20,6 +20,7 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 export const REQUIRED_CHANNELS = [
   { type: "telegram", name: "𝗚𝗜𝗙𝗧𝗦 𝗔𝗥𝗘𝗔",   link: "https://t.me/+XdZuJwc9_4Q2Yjk1",  chatId: "-1002011746823" },
   { type: "telegram", name: "⏤͟͞𝗧𝗘𝗔𝗠 > 𝗧𝗗𝗫 ™(🇮🇳)",     link: "https://t.me/+JsisAx6p0RoyYWE9",  chatId: "-1002132029651" },
+   { type: "telegram", name: "𝗦𝗶𝗻𝗴𝗵 𝗟𝗼𝗼𝘁𝘀 ( 𝗢𝗳𝗳𝗶𝗰𝗶𝗮𝗹 )",   link: "https://t.me/+EtUY2BhMaic0OThl",  chatId: "-1002011746823" },
   { type: "telegram", name: "𝗢𝗣 𝗟𝗼𝗼𝘁𝗲𝗿𝘀 ( 𝗢𝗳𝗳𝗶𝗰𝗶𝗮𝗹 )",    link: "https://t.me/+HqXsPCqDf90yN2U1",  chatId: "-1002066749099" },
   { type: "youtube",  name: "𝗦𝘂𝗯𝘀𝗰𝗿𝗶𝗯𝗲", link: "https://www.youtube.com/@hidden_gamerx" },
 ];
