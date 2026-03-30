@@ -549,4 +549,26 @@ app.post("/api/channels/save-request", async (req, res) => {
     res.status(500).json({ error: "Failed to save" });
   }
 });
+
+app.post("/api/channels/delete-request", async (req, res) => {
+  const { userId, chatId } = req.body;
+
+  if (!userId || !chatId) {
+    return res.status(400).json({ error: "Missing params" });
+  }
+
+  try {
+    const result = await JoinRequest.deleteOne({ userId, chatId });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Request not found" });
+    }
+
+    res.json({ success: true, message: "Request deleted" });
+
+  } catch (e) {
+    res.status(500).json({ error: "Failed to delete" });
+  }
+});
+
 export default app;
