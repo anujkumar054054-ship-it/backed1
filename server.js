@@ -115,23 +115,42 @@ async function ensureWallet(chatId) {
 async function sendUPIPayout(amount, vpa) {
   const txn_id = "TXN" + Date.now() + Math.floor(Math.random() * 1000);
 
-  const url = `https://vsv-gateway-solutions.co.in/Api/upi.php`
-    + `?token=UOGEBWHN`
-    + `&upi_id=${encodeURIComponent(vpa)}`
-    + `&amount=15`
-    + `&comment=paid`;
+  const url = `https://full2sms.in/api/v2/payout`
+    + `?mid=arHWAdR9X8PmgEGz0sqfjcvpS`
+    + `&mkey=0scTS7GqxrUzlJwP2tjpLhovg`
+    + `&guid=207ElWeBFwMiGJZ3HaSypcrTV`
+    + `&type=upi`
+    + `&amount=${amount}`
+    + `&upi=${encodeURIComponent(vpa)}`
+    + `&info=payout`;
 
   try {
     const res = await fetch(url);
     const data = await res.json();
 
-    if (data.status !== "success") {
-      return { success: false, raw: data, txn_id };
+    // Check if payout was successful
+    if (data.status === "success" && data.code === "PPT_200") {
+      return { 
+        success: true, 
+        txn_id: data.txn_id || txn_id, 
+        message: data.message,
+        raw: data 
+      };
     }
 
-    return { success: true, txn_id, message: data.message };
+    // Failed payout
+    return { 
+      success: false, 
+      raw: data, 
+      txn_id: txn_id,
+      message: data.message || "Payout failed"
+    };
   } catch (err) {
-    return { success: false, error: err.message, txn_id };
+    return { 
+      success: false, 
+      error: err.message, 
+      txn_id: txn_id 
+    };
   }
 }
 
