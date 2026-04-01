@@ -21,8 +21,13 @@ export const REQUIRED_CHANNELS = [
   { type: "telegram", name: "𝗚𝗜𝗙𝗧𝗦 𝗔𝗥𝗘𝗔",   link: "https://t.me/+XdZuJwc9_4Q2Yjk1",  chatId: "-1002011746823" },
   { type: "telegram", name: "⏤͟͞𝗧𝗘𝗔𝗠 > 𝗧𝗗𝗫 ™(🇮🇳)",     link: "https://t.me/+JsisAx6p0RoyYWE9",  chatId: "-1002132029651" },
    { type: "telegram", name: "𝗦𝗶𝗻𝗴𝗵 𝗟𝗼𝗼𝘁𝘀 ( 𝗢𝗳𝗳𝗶𝗰𝗶𝗮𝗹 )",   link: "https://t.me/+EtUY2BhMaic0OThl",  chatId: "-1002011746823" },
-  { type: "telegram", name: "𝗢𝗣 𝗟𝗼𝗼𝘁𝗲𝗿𝘀 ( 𝗢𝗳𝗳𝗶𝗰𝗶𝗮𝗹 )",    link: "https://t.me/+HqXsPCqDf90yN2U1",  chatId: "-1002066749099" },
+ { type: "telegram", name: "𝗢𝗣 𝗟𝗼𝗼𝘁𝗲𝗿𝘀 ( 𝗢𝗳𝗳𝗶𝗰𝗶𝗮𝗹 )",    link: "https://t.me/+HqXsPCqDf90yN2U1",  chatId: "-1002066749099" },
+ { type: "telegram", name: "🥇𝙎𝙐𝘿𝙄𝙋-𝙀𝘼𝙍𝙉-𝙒𝙄𝙏𝙃🥇",     link: "https://t.me/+ZRv5S1XJKj5iNGVl",  chatId: "-1002220786748" },
+   { type: "telegram", name: "🎁 𝟗𝟏 𝐂𝐋𝐔𝐁 𝐆𝐈𝐅𝐓 ",   link: "https://t.me/+md4XtB48aSgzMjg1",  chatId: "-1002064086589" },
+  { type: "telegram", name: "𝗔𝗹𝗹 𝗟𝗼𝗼𝘁 𝗘𝗮𝗿𝗻𝗶𝗻𝗴 ✌️",    link: "https://t.me/+pRLeyuZM2cE2YmU9",  chatId: "-1002338277890" },
+ 
   { type: "youtube",  name: "𝗦𝘂𝗯𝘀𝗰𝗿𝗶𝗯𝗲", link: "https://www.youtube.com/@hidden_gamerx" },
+  
 ];
 
 const User = mongoose.model("User", new mongoose.Schema({
