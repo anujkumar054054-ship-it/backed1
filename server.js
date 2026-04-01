@@ -475,9 +475,7 @@ app.post("/api/channels/check", async (req, res) => {
       REQUIRED_CHANNELS.map(async (ch) => {
         try {
           if (ch.type === "youtube") {
-            // Only mark joined if user actually clicked the subscribe link
-            const visited = await YoutubeVisit.findOne({ userId: String(chatId) });
-            return { ...ch, joined: !!visited };
+  return { ...ch, joined: true };
           }
 
           const realJoined = await checkChannelMembership(chatId, ch.chatId);
