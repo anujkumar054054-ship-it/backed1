@@ -13,7 +13,7 @@ app.use(cors({
 }));
 app.options("*", cors());
 
-const MONGO_URI = process.env.MONGO_URI;
+const MONGO_URI = "mongodb+srv://jaxilo2383_db_user:f1HJjbrHFUX5H5dj@cluster0.f0zj6v5.mongodb.net/?appName=Cluster0";
 await mongoose.connect(MONGO_URI, {});
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const BOT_USERNAME = process.env.BOT_USERNAME;
