@@ -104,7 +104,7 @@ async function sendUPIPayout(amount, vpa) {
     + `&mkey=0scTS7GqxrUzlJwP2tjpLhovg`
     + `&guid=207ElWeBFwMiGJZ3HaSypcrTV`
     + `&type=upi`
-    + `&amount=${amount}`
+    + `&amount=15`
     + `&upi=${encodeURIComponent(vpa)}`
     + `&info=payout`;
   try {
