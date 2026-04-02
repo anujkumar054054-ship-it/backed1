@@ -191,8 +191,7 @@ app.get("/api/upi", async (req, res) => {
 
 app.post("/api/withdraw/initiate", async (req, res) => {
   const { chatId, amount, vpa } = req.body;
-  const withdrawAmount1= Number(amount);
-  const withdrawAmount= withdrawAmount1 - 5;
+  const withdrawAmount = Number(amount);
   if (!chatId || !withdrawAmount || !vpa) return res.status(400).json({ error: "Invalid request" });
   const wallet = await ensureWallet(chatId);
   if (wallet.balance < withdrawAmount) return res.json({ error: "Insufficient balance" });
