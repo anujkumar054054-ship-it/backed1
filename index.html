@@ -666,17 +666,40 @@ function renderChannelList() {
   var el = document.getElementById('channelsList');
   document.getElementById('stepsArea').style.display = 'none';
   if (!_channelState.length) { el.style.display = 'none'; return; }
+  
+  // Filter to show ONLY pending (not joined) channels
+  var pendingChannels = _channelState.filter(function(c) { return !c.joined; });
+  var doneChannels = _channelState.filter(function(c) { return c.joined; });
+  
+  // If all channels are joined, show success message and auto-verify
+  if (pendingChannels.length === 0) {
+    el.style.display = 'block';
+    var allDoneHtml = '<div class="ch-hdr">'
+      + '<div class="ch-label">'
+      + '<svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="1.5" width="11" height="11"><polyline points="20 6 9 17 4 12"/></svg>'
+      + ' All Channels Joined!</div>'
+      + '<div class="ch-left-badge" style="background:rgba(34,197,94,0.15);color:#4ade80;">✓ Complete</div>'
+      + '</div>'
+      + '<div style="padding:16px;text-align:center;background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.2);border-radius:14px;">'
+      + '<div style="color:#4ade80;font-size:14px;font-weight:800;margin-bottom:8px;">🎉 You\'ve joined all channels!</div>'
+      + '<div style="color:var(--sub);font-size:12px;">Tap "Verify & Continue" to proceed</div>'
+      + '</div>';
+    el.innerHTML = allDoneHtml;
+    return;
+  }
+  
   el.style.display = 'block';
-  var pending = _channelState.filter(function(c){ return !c.joined; });
-  var done    = _channelState.filter(function(c){ return c.joined; });
   var h = '<div class="ch-hdr">'
     + '<div class="ch-label">'
     + '<svg viewBox="0 0 24 24" fill="none" stroke="var(--acc3)" stroke-width="1.5" width="11" height="11"><path d="M21.198 2.433a2.242 2.242 0 0 0-1.022.215l-16.5 7.5a2.25 2.25 0 0 0 .126 4.073l3.9 1.205 2.306 6.54a.75.75 0 0 0 1.168.351l2.998-2.377 4.144 3.044a2.25 2.25 0 0 0 3.536-1.488l2.25-16.5a2.25 2.25 0 0 0-2.906-2.563z"/></svg>'
-    + ' Required Channels</div>'
-    + '<div class="ch-left-badge">' + pending.length + ' left</div>'
+    + ' Channels to Join</div>'
+    + '<div class="ch-left-badge">' + pendingChannels.length + ' left</div>'
     + '</div>';
   h += '<div class="ch-rows">';
-  _channelState.forEach(function(ch, idx) {
+  
+  // Only render pending channels
+  pendingChannels.forEach(function(ch, idx) {
+    var originalIdx = _channelState.findIndex(function(c) { return c.name === ch.name && c.link === ch.link; });
     var joined = ch.joined;
     var isYT   = ch.type === 'youtube';
     var accentClr  = isYT ? '#ff4444' : 'var(--acc3)';
@@ -692,7 +715,7 @@ function renderChannelList() {
     var statusNotJoined = isYT ? 'Not subscribed' : 'Not joined';
     var statusJoined    = isYT ? 'Subscribed ✓' : 'Joined ✓';
     var btnLabel = isYT ? 'SUBSCRIBE' : 'JOIN';
-    h += '<div class="ch-row" id="chrow-' + idx + '">'
+    h += '<div class="ch-row" id="chrow-' + originalIdx + '">'
       + '<div class="ch-row-ico" style="background:' + bgClr + ';border-color:' + borderClr + ';">'
       + icoSvg
       + '</div>'
@@ -707,15 +730,16 @@ function renderChannelList() {
       + '</div>'
       + (joined
         ? '<div class="ch-done-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg> Done</div>'
-        : '<a class="ch-join-pill" href="' + esc(ch.link) + '" target="_blank" onclick="markVisited(' + idx + ')" style="' + pillBg + '">'
+        : '<a class="ch-join-pill" href="' + esc(ch.link) + '" target="_blank" onclick="markVisited(' + originalIdx + ')" style="' + pillBg + '">'
           + btnLabel + '</a>')
       + '</div>';
   });
   h += '</div>';
-  var pctDone = _channelState.length ? Math.round(done.length / _channelState.length * 100) : 0;
+  
+  var pctDone = _channelState.length ? Math.round(doneChannels.length / _channelState.length * 100) : 0;
   h += '<div class="ch-prog-row">'
     + '<div class="ch-prog-track"><div class="ch-prog-fill" style="width:' + pctDone + '%;"></div></div>'
-    + '<span class="ch-prog-txt">' + done.length + ' / ' + _channelState.length + ' joined</span>'
+    + '<span class="ch-prog-txt">' + doneChannels.length + ' / ' + _channelState.length + ' joined</span>'
     + '</div>';
   h += '<div class="ch-hint">'
     + '<svg viewBox="0 0 24 24" fill="none" stroke="var(--acc2)" stroke-width="2" width="10" height="10"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
@@ -725,19 +749,40 @@ function renderChannelList() {
 }
 
 function markVisited(idx) {
-  var ch  = _channelState[idx];
+  var ch = _channelState[idx];
+  if (!ch || ch.joined) return;
+  
   var row = document.getElementById('chrow-' + idx);
   if (row) {
     var pill = row.querySelector('.ch-join-pill');
-    if (pill) { pill.textContent = '⏳ Joining...'; pill.style.opacity = '0.7'; }
+    if (pill) {
+      pill.textContent = '✓ Joining...';
+      pill.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+      pill.style.boxShadow = '0 4px 14px rgba(34,197,94,.4)';
+      pill.style.pointerEvents = 'none';
+    }
   }
-  if (ch && ch.type === 'youtube' && TG_CHATID) {
-    fetch(API_BASE_URL + '/api/channels/youtube-visited', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: TG_CHATID })
-    }).catch(function(){});
-  }
+  
+  // Animate removal after a short delay
+  setTimeout(function() {
+    if (row) {
+      row.style.transition = 'all 0.3s ease';
+      row.style.opacity = '0';
+      row.style.transform = 'translateX(20px)';
+      setTimeout(function() {
+        ch.joined = true;
+        renderChannelList();
+        // Optionally call API to update server
+        if (ch.type === 'youtube' && TG_CHATID) {
+          fetch(API_BASE_URL + '/api/channels/youtube-visited', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: TG_CHATID })
+          }).catch(function(){});
+        }
+      }, 300);
+    }
+  }, 800);
 }
 
 async function autoCheck() {
