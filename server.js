@@ -20,9 +20,9 @@ const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;
 await mongoose.connect(MONGO_URI, {});
 
 export const REQUIRED_CHANNELS = [
-  { type: "telegram", name: "Cash Hungama",   link: "https://t.me/+wxVjfol5y-9mODQ9",  chatId: "-1003535064379" },
-  { type: "telegram", name: "Earn Daily",     link: "https://t.me/+NxHKX1IDRgg5ZDY1",  chatId: "-1003406850853" },
-  { type: "telegram", name: "Refer & Win",    link: "https://t.me/+1NkfO3yeXQ82ZmE1",  chatId: "-1003856337430" },
+  { type: "telegram", name: "𝗥𝗰𝗯 𝗟𝗼𝗼𝘁𝘀 [ 𝗢𝗳𝗳𝗶𝗰𝗶𝗮𝗹 ]",   link: "https://t.me/+wGIC2gDn5_44NDg1",  chatId:"-1002370709036" },
+  { type: "telegram", name: "𝗚𝗜𝗙𝗧𝗦 𝗔𝗥𝗘𝗔",     link: "https://t.me/+XdZuJwc9_4Q2Yjk1",  chatId: "-1002047501605" },
+  { type: "telegram", name: "⏤͟͟͞͞𝗧𝗘𝗔𝗠 > 𝗧𝗗𝗫 ™(🇮🇳)",    link: "https://t.me/+JsisAx6p0RoyYWE9",  chatId: "-1002132029651" },
   { type: "youtube",  name: "Cash Hungama YT", link: "https://youtube.com/@yourchannel" },
 ];
 
