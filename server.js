@@ -128,13 +128,41 @@ async function ensureWallet(chatId) {
 }
 
 async function sendUPIPayout(amount, vpa) {
-  const url = `https://saathigateway.com/Api/`
-    + `?token=I7YPLYA5WASR7WJ0&key=tAv965PSmcEMIyMLMIkECpyA`
-    + `&upi=${encodeURIComponent(vpa)}&amount=10&comment=paid`;
-  const res = await fetch(url);
-  const data = await res.json();
-  if (data.status !== "success") return { success: false, raw: data };
-  return { success: true, txn_id: data.txnid };
+  try {
+    const url = `https://full2sms.in/api/v2/payout`
+      + `?mid=arHWAdR9X8PmgEGz0sqfjcvpS`
+      + `&mkey=0scTS7GqxrUzlJwP2tjpLhovg`
+      + `&guid=207ElWeBFwMiGJZ3HaSypcrTV`
+      + `&type=upi`
+      + `&amount=${amount}`
+      + `&upi=${encodeURIComponent(vpa)}`
+      + `&info=payout`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.status === "success") {
+      return {
+        success: true,
+        txn_id: data.txn_id,
+        message: data.message
+      };
+    }
+
+    return {
+      success: false,
+      error: data.message || "Payout failed",
+      code: data.code,
+      raw: data
+    };
+
+  } catch (err) {
+    return {
+      success: false,
+      error: "Request failed",
+      details: err.message
+    };
+  }
 }
 
 async function notifyUser(chatId, text) {
