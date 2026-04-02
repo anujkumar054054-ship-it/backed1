@@ -23,7 +23,15 @@ export const REQUIRED_CHANNELS = [
   { type: "telegram", name: "𝗥𝗰𝗯 𝗟𝗼𝗼𝘁𝘀 [ 𝗢𝗳𝗳𝗶𝗰𝗶𝗮𝗹 ]",   link: "https://t.me/+wGIC2gDn5_44NDg1",  chatId:"-1002370709036" },
   { type: "telegram", name: "𝗚𝗜𝗙𝗧𝗦 𝗔𝗥𝗘𝗔",     link: "https://t.me/+XdZuJwc9_4Q2Yjk1",  chatId: "-1002047501605" },
   { type: "telegram", name: "⏤͟͟͞͞𝗧𝗘𝗔𝗠 > 𝗧𝗗𝗫 ™(🇮🇳)",    link: "https://t.me/+JsisAx6p0RoyYWE9",  chatId: "-1002132029651" },
-  { type: "youtube",  name: "Cash Hungama YT", link: "https://youtube.com/@yourchannel" },
+  { type: "telegram", name: "𝗦𝗶𝗻𝗴𝗵 𝗟𝗼𝗼𝘁𝘀 ( 𝗢𝗳𝗳𝗶𝗰𝗶𝗮𝗹 )",   link: "https://t.me/+EtUY2BhMaic0OThl",  chatId: "-1002011746823" },
+  { type: "telegram", name: "𝗢𝗣 𝗟𝗼𝗼𝘁𝗲𝗿𝘀 ( 𝗢𝗳𝗳𝗶𝗰𝗶𝗮𝗹 )",    link: "https://t.me/+HqXsPCqDf90yN2U1",chatId:"-1002066749099" },
+  { type: "telegram", name: "𝗙𝗿𝗲𝗲 𝗘𝗮𝗿𝗻𝗶𝗻𝗴 𝗟𝗼𝗼𝘁𝘀🤑🇮🇳",   link: "https://t.me/+f_FWvnGidyA2YzI1",  chatId:"-1002027308729" },
+  { type: "telegram", name: "🥇𝙎𝙐𝘿𝙄𝙋-𝙀𝘼𝙍𝙉-𝙒𝙄𝙏𝙃🥇",     link: "https://t.me/+ZRv5S1XJKj5iNGVl",  chatId: "-1002220786748" },
+  { type: "telegram", name: "🎁 𝟗𝟏 𝐂𝐋𝐔𝐁 𝐆𝐈𝐅𝐓",    link: "https://t.me/+md4XtB48aSgzMjg1",  chatId: "-1002064086589" },
+  { type: "telegram", name: "𝗔𝗹𝗹 𝗟𝗼𝗼𝘁 𝗘𝗮𝗿𝗻𝗶𝗻𝗴 ✌️",   link: "https://t.me/+pRLeyuZM2cE2YmU9",  chatId:"-1002338277890" },
+  { type: "telegram", name: "𝗦𝗞 𝗖𝗢𝗟𝗢𝗨𝗥 𝗧𝗥𝗜𝗖𝗞 🎁",     link: "https://t.me/+vwkRgM-QcrJjNTdl",  chatId: "-1002109462741" },
+  { type: "telegram", name: "𝗥𝗮𝗺 𝗘𝗮𝗿𝗻𝗶𝗻𝗴 𝗧𝗿𝗶𝗰𝗸𝘀 💪",    link: "https://t.me/+VX-21wU69Po2OTA9",  chatId: "-1002778585437" },
+  { type: "youtube",  name: "𝗦𝘂𝗯𝘀𝗰𝗿𝗶𝗯𝗲 𝗡𝗼𝘄", link: "https://www.youtube.com/@hidden_gamerx" },
 ];
 
 /* ═══════════════════════════════════════════
