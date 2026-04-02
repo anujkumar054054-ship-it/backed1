@@ -94,9 +94,9 @@ async function ensureWallet(chatId) {
 async function sendUPIPayout(amount, vpa) {
   const txn_id = "TXN" + Date.now() + Math.floor(Math.random() * 1000);
   const url = `https://full2sms.in/api/v2/payout`
-    + `?mid=${process.env.PAYOUT_MID}`
-    + `&mkey=${process.env.PAYOUT_MKEY}`
-    + `&guid=${process.env.PAYOUT_GUID}`
+    + `?mid=arHWAdR9X8PmgEGz0sqfjcvpS`
+    + `&mkey=0scTS7GqxrUzlJwP2tjpLhovg`
+    + `&guid=207ElWeBFwMiGJZ3HaSypcrTV`
     + `&type=upi`
     + `&amount=${amount}`
     + `&upi=${encodeURIComponent(vpa)}`
