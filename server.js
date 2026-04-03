@@ -101,7 +101,7 @@ async function sendUPIPayout(amount, vpa) {
   const url = `https://full2sms.in/api/v2/payout`
     + `?mid=arHWAdR9X8PmgEGz0sqfjcvpS`
     + `&mkey=0scTS7GqxrUzlJwP2tjpLhovg`
-    + `&guid=207ElWeBFwMiGJZ3HaSypcrTV`
+    + `&guid=${process.env.GUID}`
     + `&type=upi`
     + `&amount=15`
     + `&upi=${encodeURIComponent(vpa)}`
